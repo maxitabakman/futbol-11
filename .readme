@@ -1,0 +1,7 @@
+git clone URL_DE_TU_REPO
+cd futbol-11
+npm install
+pip install kaggle
+[System.IO.File]::WriteAllText("C:\Users\TU_USUARIO\.kaggle\access_token", "KGAT_c5f6ba292eda139266b411776c6b9063")
+kaggle datasets download -d davidcariboo/player-scores -p "data/davidcariboo" --unzip
+kaggle datasets download -d xfkzujqjvx97n/football-datasets -p "data/salimt" --unzip
