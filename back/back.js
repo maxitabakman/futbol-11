@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-
+const { cargarDatos, construirIndices, elegirGrilla } = require('./db')
 
 const app = express()
 const PORT = 3000
@@ -8,60 +8,34 @@ const PORT = 3000
 app.use(cors())
 app.use(express.json())
 
-// GET /clubes-random - devuelve 6 clubes random
-const { cargarDatos, jugadoresPorClub, elegirClubesConectados } = require('./db')
+let indices = null
 
-app.get('/clubes-random', async (req, res) => {
+app.get('/grilla', async (req, res) => {
   const db = await cargarDatos()
-  const clubes = elegirClubesConectados(db)
 
-  if (!clubes) return res.status(500).json({ error: 'No se encontraron clubes conectados' })
+  if (!indices) indices = construirIndices(db)
 
-  res.json(clubes)
+  let grilla = null
+  while (!grilla) {
+    grilla = elegirGrilla(db, indices.indiceConexiones)
+  }
+
+  const resultado = {
+    filas: grilla.filas.map(c => ({ club_id: c.club_id, nombre: c.name })),
+    columnas: grilla.columnas.map(c => ({ club_id: c.club_id, nombre: c.name })),
+    celdas: grilla.filas.map(f =>
+      grilla.columnas.map(c => ({
+        fila: f.club_id,
+        columna: c.club_id,
+        opciones: indices.indiceConexiones[f.club_id][c.club_id].length,
+        respuesta: indices.indiceConexiones[f.club_id][c.club_id][0].nombre
+      }))
+    )
+  }
+
+  res.json(resultado)
 })
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`)
-})
-
-
-app.get('/clubs/:id/jugadores', async (req, res) => {
-  const db = await cargarDatos()
-  const jugadores = jugadoresPorClub(db, req.params.id)
-  
-  if (jugadores.length === 0) {
-    return res.status(404).json({ error: 'No se encontraron jugadores para este club' })
-  }
-
-  res.json({ total: jugadores.length, data: jugadores })
-})
-app.get('/clubes-random/conexiones', async (req, res) => {
-  const db = await cargarDatos()
-  const clubes = elegirClubesConectados(db)
-  const ids = clubes.map(c => c.club_id)
-
-  const resultado = clubes.map(club => {
-    const conexiones = db.transfers
-      .filter(t =>
-        (t.from_club_id === club.club_id && ids.includes(t.to_club_id)) ||
-        (t.to_club_id === club.club_id && ids.includes(t.from_club_id))
-      )
-      // sacamos duplicados por jugador
-      .filter((t, index, self) =>
-        index === self.findIndex(x => x.player_id === t.player_id)
-      )
-      .map(t => ({
-        player_id: t.player_id,
-        player_name: t.player_name,
-        club_conectado: t.from_club_id === club.club_id ? t.to_club_id : t.from_club_id
-      }))
-
-    return {
-      club_id: club.club_id,
-      club_name: club.name,
-      conexiones
-    }
-  })
-
-  res.json(resultado)
 })

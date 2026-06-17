@@ -16,6 +16,7 @@ function leerCSV(rutaArchivo) {
 const DAVIDCARIBOO = path.join(__dirname, '..', 'data', 'davidcariboo')
 const SALIMT = path.join(__dirname, '..', 'data', 'salimt')
 const DATA = path.join(__dirname, '..', 'data')
+
 let db = null
 
 async function cargarDatos() {
@@ -24,8 +25,6 @@ async function cargarDatos() {
   console.log('Cargando datos por primera vez...')
 
   db = {
-    clubs_principales: await leerCSV(path.join(DATA, 'clubs_principales.csv')),
-    // davidcariboo
     players:            await leerCSV(path.join(DAVIDCARIBOO, 'players.csv')),
     clubs:              await leerCSV(path.join(DAVIDCARIBOO, 'clubs.csv')),
     competitions:       await leerCSV(path.join(DAVIDCARIBOO, 'competitions.csv')),
@@ -34,8 +33,8 @@ async function cargarDatos() {
     transfers:          await leerCSV(path.join(DAVIDCARIBOO, 'transfers.csv')),
     player_valuations:  await leerCSV(path.join(DAVIDCARIBOO, 'player_valuations.csv')),
     national_teams:     await leerCSV(path.join(DAVIDCARIBOO, 'national_teams.csv')),
+    clubs_principales:  await leerCSV(path.join(DATA, 'clubs_principales.csv')),
 
-    // salimt
     player_profiles:              await leerCSV(path.join(SALIMT, 'player_profiles', 'player_profiles.csv')),
     player_injuries:              await leerCSV(path.join(SALIMT, 'player_injuries', 'player_injuries.csv')),
     player_market_value:          await leerCSV(path.join(SALIMT, 'player_market_value', 'player_market_value.csv')),
@@ -53,58 +52,73 @@ async function cargarDatos() {
   return db
 }
 
-module.exports = { leerCSV, cargarDatos }
-function jugadoresPorClub(db, clubId) {
-  return db.players.filter(p => p.current_club_id === clubId)
-}
+function construirIndices(db) {
+  const idsClubsPrincipales = new Set(db.clubs_principales.map(c => c.club_id))
 
-module.exports = { leerCSV, cargarDatos, jugadoresPorClub }
-function obtenerConexiones(clubes, transfers) {
-  const ids = clubes.map(c => c.club_id)
-  const clubesConConexion = new Set()
+  // Indice por jugador: qué clubes principales tuvo
+  const indiceJugador = {}
+  for (let t of db.transfers) {
+    if (!indiceJugador[t.player_id]) {
+      indiceJugador[t.player_id] = {
+        nombre: t.player_name,
+        clubes: new Set()
+      }
+    }
+    if (idsClubsPrincipales.has(t.from_club_id)) indiceJugador[t.player_id].clubes.add(t.from_club_id)
+    if (idsClubsPrincipales.has(t.to_club_id)) indiceJugador[t.player_id].clubes.add(t.to_club_id)
+  }
 
-  for (let x = 0; x < ids.length; x++) {
-    for (let y = x + 1; y < ids.length; y++) {
-      const jugador = transfers.find(t =>
-        (t.from_club_id === ids[x] && t.to_club_id === ids[y]) ||
-        (t.from_club_id === ids[y] && t.to_club_id === ids[x])
-      )
-      if (jugador) {
-        clubesConConexion.add(ids[x])
-        clubesConConexion.add(ids[y])
+  // Filtrar jugadores con al menos 2 clubes principales
+  const jugadoresValidos = Object.entries(indiceJugador)
+    .filter(([id, j]) => j.clubes.size >= 2)
+    .map(([id, j]) => ({
+      player_id: id,
+      nombre: j.nombre,
+      clubes: [...j.clubes]
+    }))
+
+  // Indice de conexiones entre clubes
+  const indiceConexiones = {}
+  for (let j of jugadoresValidos) {
+    for (let i = 0; i < j.clubes.length; i++) {
+      for (let k = i + 1; k < j.clubes.length; k++) {
+        const a = j.clubes[i]
+        const b = j.clubes[k]
+        if (!indiceConexiones[a]) indiceConexiones[a] = {}
+        if (!indiceConexiones[b]) indiceConexiones[b] = {}
+        if (!indiceConexiones[a][b]) indiceConexiones[a][b] = []
+        if (!indiceConexiones[b][a]) indiceConexiones[b][a] = []
+        indiceConexiones[a][b].push({ player_id: j.player_id, nombre: j.nombre })
+        indiceConexiones[b][a].push({ player_id: j.player_id, nombre: j.nombre })
       }
     }
   }
 
-  return clubesConConexion
+  return { indiceConexiones, jugadoresValidos }
 }
 
-function elegirClubesConectados(db) {
-  let clubes = db.clubs_principales
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 6)
+function elegirGrilla(db, indiceConexiones, intentos = 2000) {
+  const clubs = db.clubs_principales
 
-  let intentos = 0
+  for (let i = 0; i < intentos; i++) {
+    const shuffled = [...clubs].sort(() => Math.random() - 0.5)
+    const filas = shuffled.slice(0, 3)
+    const columnas = shuffled.slice(3, 6)
 
-  while (intentos < 200) {
-    const conexiones = obtenerConexiones(clubes, db.transfers)
-
-    if (conexiones.size === 6) return clubes
-
-    const sinConexion = clubes.find(c => !conexiones.has(c.club_id))
-
-    if (sinConexion) {
-      const reemplazo = db.clubs_principales
-        .filter(c => !clubes.includes(c))
-        .sort(() => Math.random() - 0.5)[0]
-
-      clubes = clubes.map(c => c.club_id === sinConexion.club_id ? reemplazo : c)
+    let valida = true
+    for (let f of filas) {
+      for (let c of columnas) {
+        if (!indiceConexiones[f.club_id]?.[c.club_id]) {
+          valida = false
+          break
+        }
+      }
+      if (!valida) break
     }
 
-    intentos++
+    if (valida) return { filas, columnas }
   }
-
-  return clubes
+  return null
 }
 
-module.exports = { leerCSV, cargarDatos, jugadoresPorClub, elegirClubesConectados }
+module.exports = { leerCSV, cargarDatos, construirIndices, elegirGrilla }
