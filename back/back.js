@@ -1,20 +1,21 @@
 const express = require('express')
 const cors = require('cors')
-const { cargarDatos, construirIndices, elegirGrilla } = require('./db')
 
 const app = express()
 const PORT = 3000
-
 app.use(cors())
 app.use(express.json())
+const { cargarDatos, construirIndices, construirMapaLogos, elegirGrilla } = require('./db')
 
 let indices = null
 let grillaActiva = null
+let mapaLogos = null
 
 app.get('/grilla', async (req, res) => {
   const db = await cargarDatos()
 
   if (!indices) indices = construirIndices(db)
+  if (!mapaLogos) mapaLogos = construirMapaLogos(db)
 
   let grilla = null
   while (!grilla) {
@@ -24,8 +25,16 @@ app.get('/grilla', async (req, res) => {
   grillaActiva = grilla
 
   const resultado = {
-    filas: grilla.filas.map(c => ({ club_id: c.club_id, nombre: c.name })),
-    columnas: grilla.columnas.map(c => ({ club_id: c.club_id, nombre: c.name })),
+    filas: grilla.filas.map(c => ({
+      club_id: c.club_id,
+      nombre: c.name,
+      logo_url: mapaLogos[c.club_id] || null
+    })),
+    columnas: grilla.columnas.map(c => ({
+      club_id: c.club_id,
+      nombre: c.name,
+      logo_url: mapaLogos[c.club_id] || null
+    })),
     celdas: grilla.filas.map(f =>
       grilla.columnas.map(c => ({
         fila: f.club_id,
@@ -78,7 +87,52 @@ grillaActiva.filas.forEach(f => {
 
   res.json({ valido: true, celdas: celdasValidas })
 })
+app.get('/jugadores', async (req, res) => {
+    if (!indices) {
+        const db = await cargarDatos()
+        indices = construirIndices(db)
+    }
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`)
+    const nombre = (req.query.nombre || '').toLowerCase().trim()
+
+    if (!nombre) {
+        return res.json([])
+    }
+
+    const jugadores = indices.jugadoresValidos
+        .filter(j => j.nombre.toLowerCase().includes(nombre))
+        .slice(0, 5)
+
+    res.json(jugadores)
 })
+app.get('/jugadores', async (req, res) => {
+    if (!indices) {
+        const db = await cargarDatos()
+        indices = construirIndices(db)
+    }
+
+    const nombre = (req.query.nombre || '').toLowerCase().trim()
+
+    if (!nombre) {
+        return res.json([])
+    }
+
+    const jugadores = indices.jugadoresValidos
+        .filter(j => j.nombre.toLowerCase().includes(nombre))
+        .slice(0, 5)
+
+    res.json(jugadores)
+})
+async function iniciar() {
+    console.log('Precargando datos, esperá un toque...')
+    const db = await cargarDatos()
+    indices = construirIndices(db)
+    mapaLogos = construirMapaLogos(db)
+    console.log('Datos e índices listos.')
+
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en http://localhost:${PORT}`)
+    })
+}
+
+iniciar()
