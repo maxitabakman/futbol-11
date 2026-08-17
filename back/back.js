@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 
 const app = express()
-const PORT = 3000
+
 app.use(cors())
 app.use(express.json())
 const { cargarDatos, construirIndices, construirMapaLogos, elegirGrilla,construirMapaFotos } = require('./db')
@@ -134,9 +134,8 @@ async function iniciar() {
     mapaFotos = construirMapaFotos(db)
     console.log('Datos e índices listos.')
 
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo en http://localhost:${PORT}`)
-    })
+   const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
 }
 
 iniciar()
