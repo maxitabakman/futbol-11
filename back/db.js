@@ -183,11 +183,22 @@ function construirMapaLogos(db) {
 
     return mapaLogos
 }
+function construirMapaFotos(db) {
+    const mapaFotos = {}
 
+    for (let p of db.player_profiles) {
+        if (!mapaFotos[p.player_id]) {
+            mapaFotos[p.player_id] = p.player_image_url
+        }
+    }
+
+    return mapaFotos
+}
 module.exports = {
     leerCSV,
     cargarDatos,
     construirIndices,
     construirMapaLogos,
-    elegirGrilla
+    elegirGrilla,
+    construirMapaFotos
 }

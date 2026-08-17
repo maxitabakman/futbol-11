@@ -5,11 +5,12 @@ const app = express()
 const PORT = 3000
 app.use(cors())
 app.use(express.json())
-const { cargarDatos, construirIndices, construirMapaLogos, elegirGrilla } = require('./db')
+const { cargarDatos, construirIndices, construirMapaLogos, elegirGrilla,construirMapaFotos } = require('./db')
 
 let indices = null
 let grillaActiva = null
 let mapaLogos = null
+let mapaFotos = null
 
 app.get('/grilla', async (req, res) => {
   const db = await cargarDatos()
@@ -25,16 +26,16 @@ app.get('/grilla', async (req, res) => {
   grillaActiva = grilla
 
   const resultado = {
-    filas: grilla.filas.map(c => ({
-      club_id: c.club_id,
-      nombre: c.name,
-      logo_url: mapaLogos[c.club_id] || null
-    })),
-    columnas: grilla.columnas.map(c => ({
-      club_id: c.club_id,
-      nombre: c.name,
-      logo_url: mapaLogos[c.club_id] || null
-    })),
+filas: grilla.filas.map(c => ({
+  club_id: c.club_id,
+  nombre: c.pile_name || c.name,
+  logo_url: mapaLogos[c.club_id] || null
+})),
+columnas: grilla.columnas.map(c => ({
+  club_id: c.club_id,
+  nombre: c.pile_name || c.name,
+  logo_url: mapaLogos[c.club_id] || null
+})),
     celdas: grilla.filas.map(f =>
       grilla.columnas.map(c => ({
         fila: f.club_id,
@@ -71,12 +72,14 @@ grillaActiva.filas.forEach(f => {
       const encontrado = jugadores.find(j =>
         j.nombre.toLowerCase().includes(nombreLower)
       )
-      if (encontrado) {
-       celdasValidas.push({
-  fila: { club_id: f.club_id, nombre: f.name || f.nombre },
-  columna: { club_id: c.club_id, nombre: c.name || c.nombre },
-  jugador: encontrado.nombre
-})
+    if (encontrado) {
+   celdasValidas.push({
+      fila: { club_id: f.club_id, nombre: f.name || f.nombre },
+      columna: { club_id: c.club_id, nombre: c.name || c.nombre },
+      jugador: encontrado.nombre,
+      foto_url: mapaFotos[encontrado.player_id] || null
+   })
+
       }
     })
   })
@@ -128,6 +131,7 @@ async function iniciar() {
     const db = await cargarDatos()
     indices = construirIndices(db)
     mapaLogos = construirMapaLogos(db)
+    mapaFotos = construirMapaFotos(db)
     console.log('Datos e índices listos.')
 
     app.listen(PORT, () => {

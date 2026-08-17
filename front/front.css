@@ -1,0 +1,374 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #030044;
+}
+
+.equipo {
+    width: 6.8815rem;
+    height: 6.8815rem;
+    angle: 0 deg;
+    opacity: 1;
+}
+
+.cuadro {
+    position: absolute;
+    width: 36.5513rem;
+    height: 34.8027rem;
+    opacity: 1;
+    top: 11.4504rem;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4.9637rem;
+    background-color: #181488;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cuadrodos {
+    position: absolute;
+    width: 32.0952rem;
+    height: 30.9106rem;
+    angle: 0 deg;
+    opacity: 1;
+    top: 13.4246rem;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 1.1281rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.fila {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32.0952rem;
+    height: 6.8815rem;
+    angle: 0 deg;
+    opacity: 1;
+    gap: 1.5229rem;
+    flex-direction: row;
+    background-color: #000030;
+}
+
+.logocuadrado {
+    width: 6.8815rem;
+    height: 6.8815rem;
+    angle: 0 deg;
+    opacity: 1;
+}
+
+.titulo {
+    position: absolute;
+    width: 23.6342rem;
+    height: 3.5536rem;
+    angle: 0 deg;
+    opacity: 1;
+    top: 5.8098rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: Plus Jakarta Sans;
+    font-weight: 800;
+    font-style: Italic;
+    font-size: 2.8204rem;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+    color: #E0E0E0;
+}
+
+.buscador {
+    position: absolute;
+    width: 31.1362rem;
+    height: auto;
+    top: 48.735rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+.input {
+    width: 31.1362rem;
+    height: 2.9896rem;
+    box-sizing: border-box;
+    border-width: 0.3948rem;
+    border-top-left-radius: 0.7333rem;
+    border-top-right-radius: 0.7333rem;
+    background: #FFFFFF;
+    border: 0.3948rem solid #929292;
+    font-weight: 800;
+    font-style: Italic;
+    font-size: 1.6921rem;
+    line-height: 100%;
+}
+
+#sugerencias {
+    position: absolute;
+    top: 3.3844rem;
+    left: 0;
+    width: 31.1362rem;
+    z-index: 1000;
+}
+
+#sugerencias div {
+    width: 100%;
+    height: 2.5383rem;
+    box-sizing: border-box;
+    background-color: #ffff55;
+    border-bottom: 0.1128rem solid #11115c;
+    display: flex;
+    align-items: center;
+    padding-left: 0.8461rem;
+    font-size: 1.1281rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#sugerencias div:hover {
+    background-color: #eeee33;
+}
+
+.rendirse {
+    cursor: pointer;
+    position: absolute;
+    width: 3.9484rem;
+    height: 3.9484rem;
+    angle: 0 deg;
+    opacity: 1;
+    top: 48.6221rem;
+    left: calc(50% + 16rem);
+    border-radius: 0.9025rem;
+}
+
+.celda {
+    position: relative;
+    width: 6.8815rem;
+    height: 6.8815rem;
+}
+
+.casilla-fondo {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.escudo-club {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 5.6406rem;
+    height: 4.3996rem;
+    object-fit: contain;
+}
+
+.parte-amarilla {
+    position: absolute;
+    top: 3.0324rem;
+    opacity: 1;
+    display: none;
+}
+
+.img_amarilla {
+    position: absolute;
+    top: 2.5812rem;
+}
+
+.nombre-jugador {
+    position: absolute;
+    left: 0.5641rem;
+    top: 2.7503rem;
+    display: block;
+    max-width: 5.6406rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.todo {
+    position: absolute;
+    width: 70rem;
+    height: 60rem;  
+    top: 0;
+    left: 0;
+}
+
+/* ==========================================
+   ESTILOS PARA EL CUADRO "¿TE RENDIS?"
+   ========================================== */
+
+.overlay-rendirse {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+   /* Oculto por defecto */
+    background-color: rgba(0, 0, 0, 0.6); /* Oscurece el fondo al mostrarse */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+      display: none; /* Asegura estar por encima del juego */
+}
+
+.cuadro-rendirse {
+    /* MEDIDAS SOLICITADAS */
+    width: 919px;
+    height: 388px;
+    background-color: #DFDFE3;
+    border: 19px solid #1A1A8C;
+    border-radius: 132px;
+    opacity: 1;
+    angle: 0 deg;
+    
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.titulo-rendirse {
+    color: #1A1A8C;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 68px;
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    margin: 0 0 35px 0;
+    text-align: center;
+}
+
+.grupo-botones-rendirse {
+    display: flex;
+    gap: 80px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-rendirse {
+    width: 260px;
+    height: 100px;
+    border-radius: 45px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-si {
+    cursor: pointer;
+    background-color: transparent;
+    color: #1A1A8C;
+   border: 7px solid #1A1A8C;
+}
+
+.btn-si:hover {
+    background-color: #121268;
+      color: #DFDFE3;
+    transform: scale(1.03);
+}
+
+.btn-no {
+    background-color: transparent;
+    color: #1A1A8C;
+    border: 7px solid #1A1A8C;
+}
+
+.btn-no:hover {
+    background-color: #1A1A8C;
+    color: #DFDFE3;
+    transform: scale(1.03);
+}
+@keyframes sacudir {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-8px); }
+    40%  { transform: translateX(8px); }
+    60%  { transform: translateX(-6px); }
+    80%  { transform: translateX(6px); }
+    100% { transform: translateX(0); }
+}
+
+.input-error {
+    border-color: #e74c3c !important;
+    animation: sacudir 0.4s ease;
+}
+/* ==========================================
+   ESTILOS PARA EL CUADRO "¡GANASTE!"
+   ========================================== */
+
+.overlay-ganador {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    display: none;
+   /* Se activa desde JS modificando a 'flex' */
+}
+
+.cuadro-ganador {
+    width: 919px;
+    height: 388px;
+    background-color: #DFDFE3;
+    border: 19px solid #1A1A8C;
+    border-radius: 132px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.titulo-ganador {
+    color: #1A1A8C;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 68px;
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    margin: 0;
+    text-align: center;
+}
+
+.btn-jugar-nuevo {
+    width: 420px;
+    height: 95px;
+    background-color: #dfdfdf;
+    color: #1A1A8C;
+    border: 7px solid #1A1A8C;
+    border-radius: 45px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    font-style: italic;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-jugar-nuevo:hover {
+    color: #DFDFE3;
+    background-color: #121268;
+    transform: scale(1.03);
+}
