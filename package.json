@@ -1,6 +1,6 @@
 {
   "scripts": {
-  "start": "node server.js"
+  "start": "node --max-old-space-size=450 back/back.js"
 },
   "name": "futbol-11",
   "version": "1.0.0",
