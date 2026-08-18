@@ -26,30 +26,13 @@ async function cargarDatos() {
     console.log('Cargando datos por primera vez...')
 
     db = {
-        players: await leerCSV(path.join(DAVIDCARIBOO, 'players.csv')),
-        clubs: await leerCSV(path.join(DAVIDCARIBOO, 'clubs.csv')),
-        competitions: await leerCSV(path.join(DAVIDCARIBOO, 'competitions.csv')),
-        countries: await leerCSV(path.join(DAVIDCARIBOO, 'countries.csv')),
-        games: await leerCSV(path.join(DAVIDCARIBOO, 'games.csv')),
-        transfers: await leerCSV(path.join(DAVIDCARIBOO, 'transfers.csv')),
-        player_valuations: await leerCSV(path.join(DAVIDCARIBOO, 'player_valuations.csv')),
-        national_teams: await leerCSV(path.join(DAVIDCARIBOO, 'national_teams.csv')),
         clubs_principales: await leerCSV(path.join(DATA, 'clubs_principales.csv')),
-
-        player_profiles: await leerCSV(path.join(SALIMT, 'player_profiles', 'player_profiles.csv')),
-        player_injuries: await leerCSV(path.join(SALIMT, 'player_injuries', 'player_injuries.csv')),
-        player_market_value: await leerCSV(path.join(SALIMT, 'player_market_value', 'player_market_value.csv')),
-        player_performances: await leerCSV(path.join(SALIMT, 'player_performances', 'player_performances.csv')),
-        player_national_performances: await leerCSV(path.join(SALIMT, 'player_national_performances', 'player_national_performances.csv')),
-        transfer_history: await leerCSV(path.join(SALIMT, 'transfer_history', 'transfer_history.csv')),
+        transfers: await leerCSV(path.join(DAVIDCARIBOO, 'transfers.csv')),
         team_details: await leerCSV(path.join(SALIMT, 'team_details', 'team_details.csv')),
-        player_teammates: await leerCSV(path.join(SALIMT, 'player_teammates_played_with', 'player_teammates_played_with.csv')),
-        player_latest_market_value: await leerCSV(path.join(SALIMT, 'player_latest_market_value', 'player_latest_market_value.csv')),
-        team_children: await leerCSV(path.join(SALIMT, 'team_children', 'team_children.csv')),
-        team_competitions_seasons: await leerCSV(path.join(SALIMT, 'team_competitions_seasons', 'team_competitions_seasons.csv'))
+        player_profiles: await leerCSV(path.join(SALIMT, 'player_profiles', 'player_profiles.csv'))
     }
 
-    console.log('Datos cargados!')
+    console.log('¡Datos cargados!')
 
     return db
 }
