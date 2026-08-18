@@ -125,7 +125,7 @@ function marcarError() {
 
 async function cargarGrilla() {
 reiniciarCeldasInteriores() // Limpia las celdas interiores antes de cargar la nueva grilla
-    const respuesta = await fetch('http://localhost:3000/grilla')
+    const respuesta = await fetch('https://futbol-11-5p39.onrender.com/grilla')
     const grilla = await respuesta.json()
 
     grillaActual = grilla
