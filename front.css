@@ -3,7 +3,13 @@ body {
     padding: 0;
     background-color: #030044;
 }
+.logo{
+   position: absolute;
+top: 2.8rem;
+left: 50%;
+transform: translateX(-50%);
 
+}
 .equipo {
     width: 6.8815rem;
     height: 6.8815rem;
