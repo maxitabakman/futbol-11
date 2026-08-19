@@ -31,14 +31,9 @@ const DAVIDCARIBOO = path.join(__dirname, '..', 'data', 'davidcariboo')
 const SALIMT = path.join(__dirname, '..', 'data', 'salimt')
 const DATA = path.join(__dirname, '..', 'data')
 
-let db = null
-let grillaUltima = null // Guarda la grilla activa para validar las respuestas
+let grillaUltima = null
 
 async function cargarDatos() {
-    if (db) return db
-
-    console.log('Cargando y filtrando datos...')
-
     const clubs_principales = await leerCSV(path.join(DATA, 'clubs_principales.csv'))
     const idsClubsPrincipales = new Set(clubs_principales.map(c => String(c.club_id)))
 
@@ -56,16 +51,12 @@ async function cargarDatos() {
         return idsJugadoresValidos.has(String(fila.player_id))
     })
 
-    db = {
+    return {
         clubs_principales,
         transfers,
         team_details,
         player_profiles
     }
-
-    console.log('¡Datos cargados e imbatiblemente optimizados!')
-
-    return db
 }
 
 function construirIndices(db) {
@@ -182,25 +173,50 @@ function construirMapaFotos(db) {
     return mapaFotos
 }
 
+// 🔒 CONTROLADOR DE CARGA ÚNICA (Cachea la Promesa)
+let promesaInicializacion = null
+
+function obtenerEstadoGlobal() {
+    if (!promesaInicializacion) {
+        promesaInicializacion = (async () => {
+            console.log('Cargando y procesando datos por única vez...')
+            const db = await cargarDatos()
+            const { indiceConexiones, jugadoresValidos } = construirIndices(db)
+            const mapaLogos = construirMapaLogos(db)
+            const mapaFotos = construirMapaFotos(db)
+            console.log('¡Datos e índices cargados exitosamente en memoria!')
+
+            return {
+                db,
+                indiceConexiones,
+                jugadoresValidos,
+                mapaLogos,
+                mapaFotos
+            }
+        })()
+    }
+    return promesaInicializacion
+}
+
+// Iniciar la carga apenas arranca el archivo
+obtenerEstadoGlobal()
+
 // 📌 RUTA 1: Obtener Grilla
 app.get('/grilla', async (req, res) => {
     try {
-        const datos = await cargarDatos()
-        const { indiceConexiones } = construirIndices(datos)
-        const grilla = elegirGrilla(datos, indiceConexiones)
-        const mapaLogos = construirMapaLogos(datos)
-        const mapaFotos = construirMapaFotos(datos)
+        const estado = await obtenerEstadoGlobal()
+        const grilla = elegirGrilla(estado.db, estado.indiceConexiones)
 
         if (!grilla) {
             return res.status(500).json({ error: 'No se pudo generar grilla válida' })
         }
 
-        grillaUltima = grilla // Se guarda para validar las respuestas luego
+        grillaUltima = grilla
 
         res.json({
             grilla,
-            mapaLogos,
-            mapaFotos
+            mapaLogos: estado.mapaLogos,
+            mapaFotos: estado.mapaFotos
         })
     } catch (error) {
         console.error('Error generando grilla:', error)
@@ -208,16 +224,14 @@ app.get('/grilla', async (req, res) => {
     }
 })
 
-// 📌 RUTA 2: Buscador de Jugadores (Sugerencias)
+// 📌 RUTA 2: Buscador de Jugadores
 app.get('/jugadores', async (req, res) => {
     try {
         const nombreBuscado = (req.query.nombre || '').toLowerCase().trim()
         if (!nombreBuscado) return res.json([])
 
-        const datos = await cargarDatos()
-        const { jugadoresValidos } = construirIndices(datos)
+        const { jugadoresValidos } = await obtenerEstadoGlobal()
 
-        // Filtra los jugadores que contengan el texto buscado (máximo 10 resultados)
         const coincidencias = jugadoresValidos
             .filter(j => j.nombre.toLowerCase().includes(nombreBuscado))
             .slice(0, 10)
@@ -237,11 +251,8 @@ app.post('/respuesta', async (req, res) => {
             return res.json({ valido: false })
         }
 
-        const datos = await cargarDatos()
-        const { jugadoresValidos } = construirIndices(datos)
-        const mapaFotos = construirMapaFotos(datos)
+        const { jugadoresValidos, mapaFotos } = await obtenerEstadoGlobal()
 
-        // Busca al jugador por nombre
         const jugador = jugadoresValidos.find(
             j => j.nombre.toLowerCase() === nombre.toLowerCase().trim()
         )
@@ -253,7 +264,6 @@ app.post('/respuesta', async (req, res) => {
         const celdasValidas = []
         const clubesJugador = new Set(jugador.clubes.map(String))
 
-        // Verifica si el jugador jugó en el intersección de fila y columna de la grilla actual
         grillaUltima.filas.forEach(fila => {
             grillaUltima.columnas.forEach(columna => {
                 const idFila = String(fila.club_id)
@@ -269,14 +279,10 @@ app.post('/respuesta', async (req, res) => {
             })
         })
 
-        if (celdasValidas.length > 0) {
-            return res.json({
-                valido: true,
-                celdas: celdasValidas
-            })
-        } else {
-            return res.json({ valido: false })
-        }
+        res.json({
+            valido: celdasValidas.length > 0,
+            celdas: celdasValidas
+        })
     } catch (error) {
         console.error('Error en /respuesta:', error)
         res.status(500).json({ error: error.message })
