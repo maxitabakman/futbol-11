@@ -208,7 +208,9 @@ app.get('/grilla', async (req, res) => {
         const grilla = elegirGrilla(estado.db, estado.indiceConexiones)
 
         if (!grilla) {
-            return res.status(500).json({ error: 'No se pudo generar grilla válida' })
+        estado = await obtenerEstadoGlobal()
+        grilla = elegirGrilla(estado.db, estado.indiceConexiones)
+
         }
 
         grillaUltima = grilla
