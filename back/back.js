@@ -204,8 +204,8 @@ obtenerEstadoGlobal()
 // 📌 RUTA 1: Obtener Grilla
 app.get('/grilla', async (req, res) => {
     try {
-        const estado = await obtenerEstadoGlobal()
-        const grilla = elegirGrilla(estado.db, estado.indiceConexiones)
+        let  estado = await obtenerEstadoGlobal()
+        let  grilla = elegirGrilla(estado.db, estado.indiceConexiones)
 
         if (!grilla) {
         estado = await obtenerEstadoGlobal()
